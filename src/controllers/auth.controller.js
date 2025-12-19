@@ -56,7 +56,15 @@ exports.login = async (req,res, next) => {
 
 //logout
 exports.logout = async (req,res,next) => {
-  //should remove from the local storage when developing the frontend
-  
+
+  try{
+    const token = req.token;
+
+    if(!token) return res.status(400).json({message: 'Token required'});
+
    res.status(200).json({ success: true, message: 'Logged out successfully' });
+
+  }catch(err){
+    next(err);
+  }
 };
