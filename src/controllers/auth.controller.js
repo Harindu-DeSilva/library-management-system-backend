@@ -52,3 +52,11 @@ exports.login = async (req,res, next) => {
   }
 
 };
+
+
+//logout
+exports.logout = async (req,res,next) => {
+  //should remove from the local storage when developing the frontend
+  
+   res.status(200).json({ success: true, message: 'Logged out successfully' });
+};
