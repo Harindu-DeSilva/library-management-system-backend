@@ -30,3 +30,15 @@ exports.signupSchema = Joi.object({
 
 
 });
+
+
+exports.loginSchema = Joi.object({
+
+  email: Joi.string()
+    .required()
+    .email()
+    .lowercase(),
+  password: Joi.string()
+    .required()
+
+});
