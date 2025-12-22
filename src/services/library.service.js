@@ -21,4 +21,24 @@ exports.AllLibraries = async () => {
 
   return libraries;
 
-}
+};
+
+
+
+exports.libraryById= async (lib_id_params, role, library_id) => {
+
+  let library;
+
+  if(role === "superAdmin"){
+
+    library = await Library.findOne({where: {id: lib_id_params}});
+    
+  }else if((role === "admin" || role === "user") && library_id === lib_id_params){
+
+    library = await Library.findOne({where: {id: lib_id_params }});
+
+  }
+
+  return library;
+
+};

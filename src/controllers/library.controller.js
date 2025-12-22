@@ -1,5 +1,5 @@
 const Library = require("../models/library");
-const { registerLibrary, AllLibraries } = require("../services/library.service");
+const { registerLibrary, AllLibraries, libraryById } = require("../services/library.service");
 const { librarySchema } = require("../validations/library.validation");
 
 
@@ -39,6 +39,7 @@ exports.getAllLibraries = async (req,res,next) => {
   try{
 
     const libraries = await AllLibraries();
+    
 
     return res.status(200).json({ libraries });
 
@@ -48,4 +49,33 @@ exports.getAllLibraries = async (req,res,next) => {
 
   }
 
-}
+};
+
+
+exports.getLibraryById = async (req,res,next) => {
+
+  const {lib_id_params} = req.params;
+  const { role, library_id } = req.user;
+
+  try{
+
+    const library = await libraryById(lib_id_params, role, library_id);
+
+    if(!library){
+      return res.status(403).json({
+        success: false,
+        message: 'No Library found or Access denied'
+      })
+    };
+
+    return res.status(200).json({
+      success: true,
+      library
+    });
+
+
+  }catch(err){
+    return res.status(500).json({message: 'Internal server error', err: err.message});
+  }
+
+};
