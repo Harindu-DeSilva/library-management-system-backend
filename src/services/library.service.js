@@ -74,3 +74,15 @@ exports.updateLibById = async (data, lib_id_params, role, library_id) => {
   }
 
 };
+
+
+
+exports.deleteLib = async (lib_id_params) => {
+
+  const deleted = await Library.destroy({where: {id: lib_id_params}});
+
+  if(!deleted) throw new Error('No libraries found under this ID');
+
+  return deleted;
+
+}

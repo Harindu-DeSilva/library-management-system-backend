@@ -10,6 +10,6 @@ router.post('/library', verifyToken, authorizeRoles("superAdmin"), libraryContro
 router.get('/library', verifyToken, authorizeRoles("superAdmin"), libraryController.getAllLibraries);
 router.get('/library/:lib_id_params', verifyToken, authorizeRoles("superAdmin", "admin", "user"), libraryController.getLibraryById);
 router.patch('/library/:lib_id_params', verifyToken, authorizeRoles("superAdmin", "admin"), libraryController.updateLibrary);
-
+router.delete('/library/:lib_id_params', verifyToken, authorizeRoles("superAdmin"), libraryController.deleteLibraryById);
 
 module.exports = router;

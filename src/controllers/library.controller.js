@@ -1,4 +1,4 @@
-const { registerLibrary, AllLibraries, libraryById, updateById, updateLibById } = require("../services/library.service");
+const { registerLibrary, AllLibraries, libraryById, updateById, updateLibById, deleteLib } = require("../services/library.service");
 const { librarySchema, updateLibrarySchema } = require("../validations/library.validation");
 
 
@@ -124,3 +124,35 @@ exports.updateLibrary = async (req,res) => {
   }
 
 };
+
+
+
+//delete library by id 
+exports.deleteLibraryById = async (req,res) => {
+
+  const { lib_id_params } = req.params;
+
+try{
+
+  const deleted = await deleteLib(lib_id_params);
+
+  if(!deleted){
+    return res.status(403).json({
+      success:false,
+      message: 'Access denied or Library not found'
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: 'Library deleted successfully'
+  });
+
+}catch(error){
+  return res.status(500).json({
+    success: false,
+    message: 'Internal server error', error: error.message
+  });
+}
+
+}
