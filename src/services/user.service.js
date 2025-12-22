@@ -83,3 +83,32 @@ exports.getUsersById = async (user_id, role, library_id, requester_id) => {
   return user;
 
 };
+
+
+exports.updateUser = async (data,user_id_params, user_id) => {
+
+  if(user_id_params === user_id){
+
+    const user = await User.update(
+      data,
+      {
+        where: {id: user_id_params}
+      }
+    );
+
+    if(!user) throw new Error("USER_NOT_FOUND");
+
+    const newUser = await User.findOne(
+      {
+        where: {id: user_id_params},
+        attributes: {exclude: ['password']}
+      }
+    );
+
+    return newUser;
+
+  }else{
+    throw new Error("FORBIDDEN");
+  }
+
+}
