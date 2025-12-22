@@ -39,7 +39,13 @@ exports.getAllLibraries = async (req,res,next) => {
   try{
 
     const libraries = await AllLibraries();
-    
+
+    if(!libraries){
+      return res.status(404).json({
+        success: false,
+        message: 'No libraries found'
+      });
+    }   
 
     return res.status(200).json({ libraries });
 
