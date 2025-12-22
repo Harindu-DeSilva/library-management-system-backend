@@ -1,4 +1,4 @@
-const Library = require('../models/library');
+const {Library} = require('../models');
 
 
 exports.registerLibrary = async (data) => {
