@@ -1,9 +1,9 @@
 const { signupUser } = require("../services/auth.service");
-const { getAllUsers } = require("../services/user.service");
+const { getAllUsers, getUsersById } = require("../services/user.service");
 const { userRegisterSchema } = require("../validations/user.validation");
 
 
-
+// create user accounts
 exports.createUser = async (req,res,next) => {
 
   const data = req.body;
@@ -37,7 +37,7 @@ exports.createUser = async (req,res,next) => {
 };
 
 
-
+// fetch all user records by 10 per page
 exports.fetchAllUsers = async (req,res,next) => {
 
   const { library_id, role } = req.user;
@@ -64,6 +64,46 @@ exports.fetchAllUsers = async (req,res,next) => {
 
   }catch(error){
     return res.status(500).json({message: 'Internal server error', error: error.message});
+  }
+
+};
+
+
+//get user records by user ID
+exports.fetchUserById = async (req,res,next) => {
+
+  const { user_id } = req.params;
+  const { role, library_id, id } = req.user;
+
+  try{
+
+    const user = await getUsersById( user_id, role, library_id, id );
+
+    return res.status(200).json({
+      success: true,
+      user
+    });
+
+  }catch(error){
+
+     if (error.message === 'USER_NOT_FOUND') {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (error.message === 'FORBIDDEN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error', error: error.message
+    });
   }
 
 }

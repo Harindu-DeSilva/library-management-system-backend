@@ -47,3 +47,39 @@ exports.getAllUsers = async (library_id, role, page = 1, limit = 10) => {
   };
 
 };
+
+
+
+exports.getUsersById = async (user_id, role, library_id, requester_id) => {
+
+  const user =  await User.findOne(
+    {
+      where: {id: user_id},
+      attributes: {exclude: ['password']}
+    }
+  );
+
+  if(!user) throw new Error('USER_NOT_FOUND');
+
+  if(role === "superAdmin"){
+
+    return user;
+
+  }
+
+  if(role === "admin"){
+
+    if(user.library_id !== library_id){
+      throw new Error("FORBIDDEN");
+    }
+    return user;
+
+  }
+
+  if(user.id !== requester_id){
+    throw new Error("FORBIDDEN");
+  }
+
+  return user;
+
+};
