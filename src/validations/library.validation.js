@@ -16,3 +16,14 @@ exports.librarySchema = Joi.object({
     .required()
     
 });
+
+exports.updateLibrarySchema = Joi.object({
+  name: Joi.string()
+    .min(3)
+    .max(30),
+  address: Joi.string()
+    .min(3)
+    .max(100),
+  email: Joi.string()
+    .email()
+});

@@ -42,3 +42,35 @@ exports.libraryById= async (lib_id_params, role, library_id) => {
   return library;
 
 };
+
+
+exports.updateLibById = async (data, lib_id_params, role, library_id) => {
+
+  let updated_Library;
+
+  if(role === "superAdmin"){
+
+    updated_Library = await Library.update(
+      data, 
+      {
+        where: {id: lib_id_params}
+      }
+    );
+  }else if(role === "admin" && lib_id_params === library_id){
+
+    updated_Library = await Library.update(
+      data,
+      {
+        where: {id: lib_id_params}
+      }
+    );
+
+  }
+  if(updated_Library){
+    const new_Library = await Library.findOne({where: {id: lib_id_params}});
+    return new_Library;
+  }else{
+    return null;
+  }
+
+};
