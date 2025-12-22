@@ -1,5 +1,5 @@
 const { signupUser } = require("../services/auth.service");
-const { getAllUsers, getUsersById, updateUser } = require("../services/user.service");
+const { getAllUsers, getUsersById, updateUser, deleteUser } = require("../services/user.service");
 const { userRegisterSchema, userUpdateSchema } = require("../validations/user.validation");
 
 
@@ -109,7 +109,7 @@ exports.fetchUserById = async (req,res,next) => {
 };
 
 
-
+// update user details by user id
 exports.updateUserById = async (req,res,next) => {
 
   const { user_id } = req.params
@@ -156,4 +156,41 @@ exports.updateUserById = async (req,res,next) => {
   }
 
 
-}
+};
+
+
+//delete user by User ID
+exports.deleteUserById = async (req,res) => {
+
+  const { user_id } = req.params;
+  const { role, library_id, id } = req.user;
+
+  try{
+
+    const result = await deleteUser(user_id, role, library_id, id);
+
+    if(result) return res.status(200).json({message: 'User deleted successfully'})
+
+  }catch(error){
+
+    if (error.message === 'USER_NOT_FOUND') {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (error.message === 'FORBIDDEN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    })
+  }
+
+};

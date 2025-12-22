@@ -111,4 +111,28 @@ exports.updateUser = async (data,user_id_params, user_id) => {
     throw new Error("FORBIDDEN");
   }
 
+};
+
+
+exports.deleteUser = async (user_id, role, library_id, requester_id) => {
+
+  const user = await User.findOne({where: {id: user_id}});
+  if(!user) throw new Error("User not found")
+
+ 
+
+  if(role === "admin" && library_id !== user.library_id){
+
+    throw new Error('FORBIDDEN');
+
+  }
+
+  if(user.id === requester_id){
+    throw new Error('FORBIDDEN');
+  }
+
+  const deletedUser = await User.destroy({where: {id: user_id}});
+
+  return deletedUser;
+
 }

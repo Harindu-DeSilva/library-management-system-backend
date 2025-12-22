@@ -10,6 +10,6 @@ router.post('/users', verifyToken, authorizeRoles("superAdmin", "admin"), userCo
 router.get('/users', verifyToken, authorizeRoles("superAdmin", "admin"), userController.fetchAllUsers);
 router.get('/users/:user_id', verifyToken, authorizeRoles("superAdmin", "admin", "user"), userController.fetchUserById);
 router.patch('/users/:user_id', verifyToken, authorizeRoles("superAdmin", "admin", "user"), userController.updateUserById);
-
+router.delete('/users/:user_id', verifyToken, authorizeRoles("superAdmin","admin"), userController.deleteUserById);
 
 module.exports = router;
