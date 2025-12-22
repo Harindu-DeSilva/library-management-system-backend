@@ -1,9 +1,13 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
+const {User, Library} = require('../models');
 
 
 exports.signupUser = async (data) => {
+
+  const library = await Library.findByPk(data.library_id);
+  if(!library)throw new Error('No Library found under this Library ID');
+
   const existing = await User.findOne({ where: { email: data.email } });
 
   if(existing) throw new Error('Email already exists!');

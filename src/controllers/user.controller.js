@@ -1,4 +1,5 @@
-const { registerUser } = require("../services/user.service");
+const { signupUser } = require("../services/auth.service");
+const { getAllUsers } = require("../services/user.service");
 const { userRegisterSchema } = require("../validations/user.validation");
 
 
@@ -18,7 +19,7 @@ exports.createUser = async (req,res,next) => {
 
     if(library_id === value.library_id || role === "superAdmin"){
 
-      const user = await registerUser(value);
+      const user = await signupUser(value);
 
       if(!user){
         return res.status(500).json({message: 'Internal server error'})
@@ -34,3 +35,35 @@ exports.createUser = async (req,res,next) => {
   }
 
 };
+
+
+
+exports.fetchAllUsers = async (req,res,next) => {
+
+  const { library_id, role } = req.user;
+  const { page = 1, limit = 10 } = req.query;
+
+  try{
+
+    const result = await getAllUsers(
+      library_id,
+      role,
+      parseInt(page),
+      parseInt(limit)
+    );
+
+    if(!result.users.length){
+      return res.status(404).json({
+        success: false,
+        message: 'No users found'
+      });
+    }
+
+
+    return res.status(200).json({success: true, ...result});
+
+  }catch(error){
+    return res.status(500).json({message: 'Internal server error', error: error.message});
+  }
+
+}

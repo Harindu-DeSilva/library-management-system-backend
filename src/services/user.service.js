@@ -14,3 +14,36 @@ exports.registerUser = async (data) => {
   return newUser;
 
 };
+
+
+
+exports.getAllUsers = async (library_id, role, page = 1, limit = 10) => {
+
+  const offset = (page - 1) * limit;
+
+  let whereClause = {};
+  if(role === "admin"){
+
+    whereClause.library_id = library_id;
+
+  }
+
+  const { rows: users, count } = await User.findAndCountAll({
+    where: whereClause,
+    attributes: { exclude: ['password'] },
+    limit,
+    offset,
+    order: [['createdAT', 'DESC']]
+  });
+
+  return {
+    users,
+    pagination: {
+      totalUsers: count,
+      currentPage: page,
+      totalPages: Math.ceil(count/limit),
+      pageSize: limit
+    }
+  };
+
+};
