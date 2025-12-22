@@ -5,7 +5,7 @@ const { sequelize } = require('./models');
 const PORT = process.env.PORT || 5000;
 
 
-sequelize.sync({alter: true})
+sequelize.sync()
   .then(() => console.log('Tables synced'))
   .catch(err => console.error(err));
 
