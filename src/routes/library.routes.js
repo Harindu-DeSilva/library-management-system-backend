@@ -7,6 +7,7 @@ const router = express.Router();
 
 
 router.post('/library', verifyToken, authorizeRoles("superAdmin"), libraryController.newLibrary);
+router.get('/library', verifyToken, authorizeRoles("superAdmin"), libraryController.getAllLibraries);
 
 
 module.exports = router;

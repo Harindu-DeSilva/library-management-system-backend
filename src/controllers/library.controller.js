@@ -1,4 +1,5 @@
-const { registerLibrary } = require("../services/library.service");
+const Library = require("../models/library");
+const { registerLibrary, AllLibraries } = require("../services/library.service");
 const { librarySchema } = require("../validations/library.validation");
 
 
@@ -30,3 +31,21 @@ exports.newLibrary = async (req,res,next) => {
   }
 
 };
+
+
+
+exports.getAllLibraries = async (req,res,next) => {
+
+  try{
+
+    const libraries = await AllLibraries();
+
+    return res.status(200).json({ libraries });
+
+  }catch(err){
+
+    return res.status(500).json({message: 'Internal server eroor', err: err.message});
+
+  }
+
+}

@@ -1,4 +1,3 @@
-
 const Library = require('../models/library');
 
 
@@ -12,3 +11,14 @@ exports.registerLibrary = async (data) => {
 
   return newLibrary;
 };
+
+
+exports.AllLibraries = async () => {
+
+  const libraries = await Library.findAll();
+
+  if(!libraries) throw new Error('Libraries not found! Please register a library first.');
+
+  return libraries;
+
+}
