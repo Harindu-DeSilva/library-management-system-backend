@@ -5,6 +5,7 @@ testConnection();
 const Library = require('./library')(sequelize);
 const User = require('./user')(sequelize);
 const Category = require('./category')(sequelize);
+const Book = require('./book')(sequelize);
 
 // Define associations
 Library.hasMany(User, {
@@ -39,4 +40,19 @@ Category.belongsTo(User, {
   as: 'admin'
 });
 
-module.exports = { sequelize, User, Library, Category };
+
+// one category has many books
+Category.hasMany(Book, {
+  foreignKey: 'category_id',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE'
+});
+
+// Each Book belongs to one Category
+Book.belongsTo(Category, {
+  foreignKey: 'category_id'
+});
+
+
+
+module.exports = { sequelize, User, Library, Category, Book };
