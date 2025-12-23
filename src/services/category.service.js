@@ -79,3 +79,38 @@ exports.getCategories = async (lib_id_params, user_role ,library_id, page = 1, l
   };
 
 };
+
+
+exports.editCategory = async (data, category_id, library_id) => {
+
+  const category_exists = await Category.findOne({where: {id: category_id}});
+  if(!category_exists){
+    throw new Error('Category not found');
+  }
+
+  if(category_exists.library_id === library_id){
+
+    const category = await Category.update(
+      data,
+      {
+        where: {
+          id: category_id
+        }
+      }
+    );
+
+    if(!category) throw new Error('Category update failed');
+
+    const newCategory = await Category.findOne({
+      where: {
+        id: category_id
+      }
+    });
+
+    return newCategory;
+
+  }else{
+    throw new Error('Forbidden: you do not have access');
+  }
+
+};
