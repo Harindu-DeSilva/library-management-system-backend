@@ -1,7 +1,8 @@
-const { newCategory } = require("../services/category.service");
+const { newCategory, getCategories } = require("../services/category.service");
 const { categorySchema } = require("../validations/category.validation");
 
 
+// create categories by library admin
 exports.createNewCategory = async (req,res,next) => {
 
   const { category_name } = req.body;
@@ -31,6 +32,29 @@ exports.createNewCategory = async (req,res,next) => {
 
   }catch(error){
     return res.status(500).json({success: false, message: error.message});
+  }
+
+};
+
+
+//fetch all categories based on library ID
+exports.fetchAllCategories = async (req,res,next) => {
+
+  const { lib_id_params } = req.params;
+  const { role, library_id } = req.user;
+
+  try{
+
+    const categories = await getCategories(lib_id_params, role, library_id);
+
+    if(!categories){
+      return res.status(404).json({message: "Categories not found"});
+    }
+
+    return res.status(200).json(categories);
+
+  }catch(error){
+    return res.status(500).json({message: error.message});
   }
 
 }

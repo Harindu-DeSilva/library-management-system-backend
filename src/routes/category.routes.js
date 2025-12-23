@@ -7,5 +7,6 @@ const router = express.Router();
 
 
 router.post('/category', verifyToken, authorizeRoles("admin"), categoryController.createNewCategory);
+router.get('/category/:lib_id_params', verifyToken, authorizeRoles("superAdmin", "admin", "user"), categoryController.fetchAllCategories);
 
 module.exports = router;

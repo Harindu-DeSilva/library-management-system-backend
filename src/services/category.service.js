@@ -42,3 +42,40 @@ exports.newCategory = async (data, library_id, admin_id) => {
   return newCategory;
 
 };
+
+
+exports.getCategories = async (lib_id_params, user_role ,library_id, page = 1, limit = 10) => {
+
+  const offset = (page - 1) * limit;
+
+  let whereClause = {};
+
+  if(user_role === "superAdmin"){
+
+    whereClause.library_id = lib_id_params;
+
+  }else if ((user_role === "admin" || user_role === "user") && lib_id_params === library_id){
+    if(lib_id_params !== library_id){
+      throw new Error("Forbidden: You do not have access for this");
+    }
+    whereClause.library_id = lib_id_params;
+  }
+
+  const { rows: categories, count } = await Category.findAndCountAll({
+    where: whereClause,
+    limit,
+    offset,
+    order: [['createdAT', 'DESC']]
+  });
+
+  return {
+    categories,
+    pagination: {
+      totalCategories: count,
+      currentPage: page,
+      totalPages: Math.ceil(count/limit),
+      pageSize: limit
+    }
+  };
+
+};
