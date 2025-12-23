@@ -21,7 +21,17 @@ module.exports = (sequelize) => {
       },
       onDelete: 'SET NULL',
       onUpdate: 'CASCADE'
-    }
+    },
+    admin_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id'
+      },
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE'
+    },
   },{
     tableName: 'categories',
     timestamps: true
