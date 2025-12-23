@@ -1,4 +1,4 @@
-const { newCategory, getCategories, editCategory } = require("../services/category.service");
+const { newCategory, getCategories, editCategory, removeCategory } = require("../services/category.service");
 const { categorySchema, updateCategorySchema } = require("../validations/category.validation");
 
 
@@ -85,4 +85,23 @@ exports.updateCategory = async (req,res) => {
     return res.status(500).json({message: error.message});
   }
 
-}
+};
+
+
+//delete category by admin
+exports.deleteCategory = async (req,res) => {
+
+  const { category_id } = req.params;
+  const { library_id } =req.user;
+
+  try{
+
+    const categoryDelete = await removeCategory(category_id, library_id);
+
+    return res.status(200).json({message: 'Category deleted successfully'});
+
+  }catch(error){
+    return res.status(500).json({error: error.message});
+  }
+
+};

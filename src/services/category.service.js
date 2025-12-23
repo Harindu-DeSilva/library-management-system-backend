@@ -81,14 +81,14 @@ exports.getCategories = async (lib_id_params, user_role ,library_id, page = 1, l
 };
 
 
-exports.editCategory = async (data, category_id, library_id) => {
+exports.editCategory = async (data, category_id, admin_library_id) => {
 
   const category_exists = await Category.findOne({where: {id: category_id}});
   if(!category_exists){
     throw new Error('Category not found');
   }
 
-  if(category_exists.library_id === library_id){
+  if(category_exists.library_id === admin_library_id){
 
     const category = await Category.update(
       data,
@@ -114,3 +114,33 @@ exports.editCategory = async (data, category_id, library_id) => {
   }
 
 };
+
+
+
+exports.removeCategory = async (category_id, admin_library_id) => {
+
+  const exists = await Category.findOne(
+    {
+      where:{
+        id: category_id
+      }
+    }
+  );
+
+  if(!exists) throw new Error("Category not found");
+
+  if(exists.library_id === admin_library_id){
+
+    const deleteCaegory = await Category.destroy({
+      where: {
+        id: category_id
+      }
+    });
+
+    if(!deleteCaegory) throw new Error('Category delete failed');
+
+    return deleteCaegory;
+
+  }
+
+}
