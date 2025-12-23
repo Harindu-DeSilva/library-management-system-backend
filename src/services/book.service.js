@@ -43,9 +43,43 @@ exports.addNewBook = async (data) => {
   const newBook = await Book.create({
     title: data.title,
     author: data.author,
+    library_id: data.library_id,
     category_id: data.category_id,
     image
   });
 
   return newBook;
+};
+
+
+exports.getAllBooks = async (user_role, library_id,page = 1, limit = 10) => {
+
+  const offset = (page - 1) * limit;
+
+  let whereClause = {};
+
+  if(user_role === "superAdmin"){
+    whereClause;
+  }else if(user_role === "admin" || user_role === "user"){
+    whereClause.library_id = library_id;
+  }
+
+  const { rows: books, count} = await Book.findAndCountAll({
+    where: whereClause,
+    limit,
+    offset,
+    order: [['createdAT', 'DESC']]
+  });
+
+
+  return {
+    books,
+    pagination: {
+      totalBooks: count,
+      currentPage: page,
+      totalPages: Math.ceil(count/limit),
+      pageSize: limit
+    }
+  };
+
 };

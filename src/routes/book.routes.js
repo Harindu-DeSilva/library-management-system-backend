@@ -5,6 +5,7 @@ const { verifyToken, authorizeRoles } = require('../middlewares/auth.middleware'
 const router = express.Router();
 
 
-router.post('/book', verifyToken , authorizeRoles("admin"), upload.single('image'), bookController.createBook);
+router.post('/books', verifyToken , authorizeRoles("admin"), upload.single('image'), bookController.createBook);
+router.get('/books', verifyToken, authorizeRoles("superAdmin", "admin", "user"), bookController.fetchAllBooks);
 
 module.exports = router;

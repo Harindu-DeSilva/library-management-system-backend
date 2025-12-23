@@ -11,6 +11,14 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false
     },
+    library_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'libraries',
+        key: 'id'
+      }
+    },
     category_id: {
       type: DataTypes.UUID,
       allowNull: false,

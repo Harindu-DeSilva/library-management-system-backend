@@ -1,4 +1,4 @@
-const { addNewBook } = require("../services/book.service");
+const { addNewBook, getAllBooks } = require("../services/book.service");
 const { bookSchema } = require("../validations/book.validation");
 
 
@@ -7,6 +7,7 @@ exports.createBook = async (req, res) => {
   try {
     const { title, category_id, author } = req.body;
     const file = req.file;
+    const { library_id } = req.user;
 
     const { error, value } = await bookSchema.validate({
       title,
@@ -18,7 +19,7 @@ exports.createBook = async (req, res) => {
       return res.status(400).json({message: error.details[0].message});
     }
 
-    const addBook = await addNewBook({...value, file});
+    const addBook = await addNewBook({...value, file, library_id});
 
     return res.status(201).json({
       success: true,
@@ -29,4 +30,26 @@ exports.createBook = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message});
   }
+};
+
+
+// fetch all books 
+exports.fetchAllBooks = async (req,res) => {
+
+  const { role, library_id } = req.user;
+
+  try{
+
+    const result = await getAllBooks(role, library_id);
+
+    if (result.books.length === 0) {
+      return res.status(404).json({ success: false, message: 'Books not found' });
+    }
+
+    return res.status(200).json(result);
+
+  }catch(error){
+    return res.status(500).json({error: error.message});
+  }
+
 };

@@ -54,5 +54,15 @@ Book.belongsTo(Category, {
 });
 
 
+Library.hasMany(Book, {
+  foreignKey: 'library_id',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE'
+});
+
+Book.belongsTo(Library, {
+  foreignKey: 'library_id'
+});
+
 
 module.exports = { sequelize, User, Library, Category, Book };
