@@ -59,7 +59,7 @@ exports.fetchAllCategories = async (req,res,next) => {
 
 };
 
-
+//update category details by admin
 exports.updateCategory = async (req,res) => {
 
   const { category_id } = req.params;
