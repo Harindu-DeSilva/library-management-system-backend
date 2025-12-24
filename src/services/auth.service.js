@@ -35,7 +35,7 @@ exports.loginUser = async (data) => {
       id: user.id,
       role: user.role,
       library_id: user.library_id,
-      oneTime: user.oneTime
+      oneTime: Boolean(user.oneTime)
     },
     process.env.JWT_SECRET,
     {
@@ -80,7 +80,7 @@ exports.resetPasswordAtFirstLogin = async (data) => {
       id: user.id,
       role: user.role,
       library_id: user.library_id,
-      oneTime: user.oneTime
+      oneTime: false
     },
     process.env.JWT_SECRET,
     {

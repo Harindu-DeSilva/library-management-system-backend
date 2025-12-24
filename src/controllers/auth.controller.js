@@ -45,6 +45,14 @@ exports.login = async (req,res, next) => {
 
     const {safeUser,token} = await loginUser(value);
 
+     // Set JWT as HTTP-only cookie
+    res.cookie('Authorization', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+      maxAge: 8 * 60 * 60 * 1000, 
+    });
+
     return res.status(200).json({message:'user login successfully', user:safeUser,token});
 
   }catch(error){
@@ -58,14 +66,14 @@ exports.login = async (req,res, next) => {
 exports.logout = async (req,res,next) => {
 
   try{
-    const token = req.token;
-
-    if(!token) return res.status(400).json({message: 'Token required'});
-
-   res.status(200).json({ success: true, message: 'Logged out successfully' });
+    res.clearCookie('Authorization'); 
+    res.status(200).json({ success: true, message: 'Logged out successfully' });
 
   }catch(err){
-    next(err);
+    return res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 };
 
@@ -85,7 +93,15 @@ exports.resetPassword = async (req, res) => {
 
     const {safeUser,token} = await resetPasswordAtFirstLogin({...value, userId});
 
-    return res.status(200).json({message:'user login successfully', user:safeUser,token});
+    
+    res.cookie('Authorization', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+      maxAge: 8 * 60 * 60 * 1000, 
+    });
+
+    return res.status(200).json({message:'user login successfully', user:safeUser, token});
 
   }catch(error){
     return res.status(500).json({

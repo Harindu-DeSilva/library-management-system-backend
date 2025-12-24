@@ -45,7 +45,7 @@ exports.authorizeRoles = (...roles) => (req,res,next) => {
 
 
 exports.firstLogin = (req, res, next) => {
-  if (req.user.oneTime) {
+  if (req.user.oneTime === true) {
     return res.status(403).json({
       message: 'Password change required'
     });
