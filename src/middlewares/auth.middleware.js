@@ -42,3 +42,13 @@ exports.authorizeRoles = (...roles) => (req,res,next) => {
 
   next();
 };
+
+
+exports.firstLogin = (req, res, next) => {
+  if (req.user.oneTime) {
+    return res.status(403).json({
+      message: 'Password change required'
+    });
+  }
+  next();
+};

@@ -20,6 +20,10 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false
     },
+    oneTime: {
+      type: DataTypes.BOOLEAN,
+      default: true
+    },
     role: {
       type: DataTypes.ENUM('superAdmin', 'admin', 'user'),
       defaultValue: 'user'

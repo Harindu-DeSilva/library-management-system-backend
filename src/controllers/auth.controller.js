@@ -1,5 +1,5 @@
-const { signupUser, loginUser } = require('../services/auth.service');
-const { signupSchema, loginSchema } = require('../validations/auth.validation');
+const { signupUser, loginUser, resetPasswordAtFirstLogin } = require('../services/auth.service');
+const { signupSchema, loginSchema, changePasswordSchema } = require('../validations/auth.validation');
 
 
 exports.signup = async (req,res, next) => {
@@ -45,10 +45,10 @@ exports.login = async (req,res, next) => {
 
     const {safeUser,token} = await loginUser(value);
 
-    return res.status(201).json({message:'user login successfully', user:safeUser,token});
+    return res.status(200).json({message:'user login successfully', user:safeUser,token});
 
   }catch(error){
-    next(error);
+    return res.status(500).json({success: false, error: error.message});
   }
 
 };
@@ -67,4 +67,31 @@ exports.logout = async (req,res,next) => {
   }catch(err){
     next(err);
   }
+};
+
+
+//reset password
+exports.resetPassword = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const userId = req.user.id;
+
+  try{
+
+    const { error, value } = await changePasswordSchema.validate({oldPassword, newPassword});
+
+    if(error){
+      return res.status(400).json({message: error.details[0].message});
+    }
+
+    const {safeUser,token} = await resetPasswordAtFirstLogin({...value, userId});
+
+    return res.status(200).json({message:'user login successfully', user:safeUser,token});
+
+  }catch(error){
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+
 };
