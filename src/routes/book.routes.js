@@ -8,5 +8,6 @@ const router = express.Router();
 router.post('/books', verifyToken , authorizeRoles("admin"), upload.single('image'), bookController.createBook);
 router.get('/books', verifyToken, authorizeRoles("superAdmin", "admin", "user"), bookController.fetchAllBooks);
 router.get('/books/:category_id', verifyToken, authorizeRoles("superAdmin", "admin", "user"), bookController.fetchAllBooksByCategoryID);
+router.get('/books/:book_id/book', verifyToken, authorizeRoles("superAdmin", "admin", "user"), bookController.fetchBookByID);
 
 module.exports = router;

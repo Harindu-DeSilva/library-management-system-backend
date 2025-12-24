@@ -127,3 +127,23 @@ exports.getAllBooksByCategory = async (category_id, user_role, user_library_id, 
     }
   };
 };
+
+
+exports.getBookById = async (book_id, user_role, user_library_id) => {
+
+  const book = await Book.findOne({
+    where: { id: book_id }
+  });
+
+  if (!book) {
+    throw new Error('Book does not exist');
+  }
+
+  
+  if (user_role !== 'superAdmin' && book.library_id !== user_library_id) {
+    throw new Error('Book is not available in this library');
+  }
+
+  return book;
+
+};

@@ -1,4 +1,4 @@
-const { addNewBook, getAllBooks, getAllBooksByCategory } = require("../services/book.service");
+const { addNewBook, getAllBooks, getAllBooksByCategory, getBookById } = require("../services/book.service");
 const { bookSchema } = require("../validations/book.validation");
 
 
@@ -73,6 +73,28 @@ exports.fetchAllBooksByCategoryID = async (req,res) => {
 
   }catch(error){
     return res.status(500).json({error: error.message});
+  }
+
+};
+
+
+//fetch book by book ID
+exports.fetchBookByID = async (req,res) => {
+
+  const { book_id } = req.params;
+  const { role, library_id } = req.user;
+
+  try{
+
+    const book = await getBookById(book_id, role, library_id);
+
+    return res.status(200).json({
+      success: true,
+      book
+    });
+
+  }catch(error){
+    return res.status(500).json({success: false, error: error.message});
   }
 
 };
