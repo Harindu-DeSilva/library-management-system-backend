@@ -10,5 +10,6 @@ router.get('/books', verifyToken, authorizeRoles("superAdmin", "admin", "user"),
 router.get('/books/:category_id', verifyToken, authorizeRoles("superAdmin", "admin", "user"), bookController.fetchAllBooksByCategoryID);
 router.get('/books/:book_id/book', verifyToken, authorizeRoles("superAdmin", "admin", "user"), bookController.fetchBookByID);
 router.patch('/books/:book_id', verifyToken, authorizeRoles("admin"), upload.single('image'),bookController.updateBookById);
+router.delete('/books/:book_id', verifyToken, authorizeRoles("admin"), bookController.deleteBookById);
 
 module.exports = router;

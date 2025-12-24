@@ -1,4 +1,4 @@
-const { addNewBook, getAllBooks, getAllBooksByCategory, getBookById, updateBook } = require("../services/book.service");
+const { addNewBook, getAllBooks, getAllBooksByCategory, getBookById, updateBook, deleteBook } = require("../services/book.service");
 const { bookSchema, updateBookSchema } = require("../validations/book.validation");
 
 
@@ -125,6 +125,35 @@ exports.updateBookById = async (req,res) => {
 
   }catch(error){
     return res.status(500).json({error: error.message});
+  }
+
+};
+
+
+// delete book by ID
+exports.deleteBookById = async (req,res) => {
+
+  const { book_id } = req.params;
+  const { library_id } = req.user;
+
+  try{
+
+    const result = await deleteBook(book_id, library_id);
+
+    if(!result){
+      return res.status(404).json({success: false, message: 'Book not found'});
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Book records deleted successfully'
+    });
+
+  }catch{
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 
 };

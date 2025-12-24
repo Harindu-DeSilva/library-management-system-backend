@@ -238,3 +238,23 @@ exports.updateBook = async (data) => {
 
   return book;
 };
+
+
+
+exports.deleteBook = async (book_id, admin_library_id) => {
+
+  const book = await Book.findOne({where: {id: book_id}});
+
+  if(book.library_id !== admin_library_id){
+    throw new Error('Access denied');
+  }
+
+  if (book.image_public_id) {
+    await cloudinary.uploader.destroy(book.image_public_id);
+  }
+
+  const result = await Book.destroy({where: {id: book_id}});
+
+  return result;
+
+};
