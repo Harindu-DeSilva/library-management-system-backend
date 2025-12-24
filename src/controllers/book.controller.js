@@ -1,4 +1,4 @@
-const { addNewBook, getAllBooks } = require("../services/book.service");
+const { addNewBook, getAllBooks, getAllBooksByCategory } = require("../services/book.service");
 const { bookSchema } = require("../validations/book.validation");
 
 
@@ -44,6 +44,29 @@ exports.fetchAllBooks = async (req,res) => {
 
     if (result.books.length === 0) {
       return res.status(404).json({ success: false, message: 'Books not found' });
+    }
+
+    return res.status(200).json(result);
+
+  }catch(error){
+    return res.status(500).json({error: error.message});
+  }
+
+};
+
+
+//fetch all books by category ID
+exports.fetchAllBooksByCategoryID = async (req,res) => {
+
+  const { category_id } = req.params;
+  const { role, library_id } = req.user;
+
+  try{
+
+    const result = await getAllBooksByCategory(category_id, role, library_id);
+
+    if(result.books.length === 0){
+      return res.status(404).json({success: false, message: 'Books not found under this category'});
     }
 
     return res.status(200).json(result);

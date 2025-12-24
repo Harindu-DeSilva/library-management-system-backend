@@ -1,6 +1,6 @@
 const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
-const { Book, Category } = require('../models');
+const { Book, Category, Library } = require('../models');
 
 // upload images to cloudinary
 const uploadToCloudinary = (file) => {
@@ -82,4 +82,48 @@ exports.getAllBooks = async (user_role, library_id,page = 1, limit = 10) => {
     }
   };
 
+};
+
+exports.getAllBooksByCategory = async (category_id, user_role, user_library_id, page = 1, limit = 10) => {
+
+  const offset = (page - 1) * limit;
+
+  // Check category exists
+  const category = await Category.findOne({
+    where: { id: category_id }
+  });
+
+  if (!category) {
+    throw new Error('Category does not exist');
+  }
+
+  
+  if (user_role !== 'superAdmin' && category.library_id !== user_library_id) {
+    throw new Error('Access denied to this category');
+  }
+
+  const whereClause = {
+    category_id
+  };
+
+  if (user_role !== 'superAdmin') {
+    whereClause.library_id = user_library_id;
+  }
+
+  const { rows: books, count } = await Book.findAndCountAll({
+    where: whereClause,
+    limit,
+    offset,
+    order: [['createdAt', 'DESC']]
+  });
+
+  return {
+    books,
+    pagination: {
+      totalBooks: count,
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      pageSize: limit
+    }
+  };
 };
