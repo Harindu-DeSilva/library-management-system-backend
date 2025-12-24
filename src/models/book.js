@@ -36,7 +36,17 @@ module.exports = (sequelize) => {
     image: {
       type: DataTypes.STRING,  
       allowNull: true
+    },
+    image_public_id: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+   status: {
+      type: DataTypes.ENUM('available', 'borrowed', 'damaged'),
+      defaultValue: 'available',
+      allowNull: false
     }
+
   }, {
     tableName: 'books',
     timestamps: true

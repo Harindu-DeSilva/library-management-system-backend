@@ -1,5 +1,5 @@
-const { addNewBook, getAllBooks, getAllBooksByCategory, getBookById } = require("../services/book.service");
-const { bookSchema } = require("../validations/book.validation");
+const { addNewBook, getAllBooks, getAllBooksByCategory, getBookById, updateBook } = require("../services/book.service");
+const { bookSchema, updateBookSchema } = require("../validations/book.validation");
 
 
 // add new books 
@@ -95,6 +95,36 @@ exports.fetchBookByID = async (req,res) => {
 
   }catch(error){
     return res.status(500).json({success: false, error: error.message});
+  }
+
+};
+
+
+// update book by book ID
+exports.updateBookById = async (req,res) => {
+
+  const { book_id } = req.params;
+  const { title, category_id, author, status } = req.body;
+  const file = req.file;
+  const { library_id } = req.user;
+
+  try{
+
+    const { error, value } = await updateBookSchema.validate({title, category_id, author, status});
+
+    if(error){
+      return res.status(400).json({message: error.details[0].message});
+    }
+
+    const updatedBook =  await updateBook({...value, file, book_id, library_id});
+
+    return res.status(201).json({
+      success: true,
+      book: updatedBook
+    });
+
+  }catch(error){
+    return res.status(500).json({error: error.message});
   }
 
 };

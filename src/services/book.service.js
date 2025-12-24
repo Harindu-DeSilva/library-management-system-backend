@@ -9,13 +9,17 @@ const uploadToCloudinary = (file) => {
       { folder: 'books' },
       (error, result) => {
         if (error) reject(error);
-        else resolve(result.secure_url);
+        else resolve({
+          url: result.secure_url,
+          public_id: result.public_id
+        });
       }
     );
 
     streamifier.createReadStream(file.buffer).pipe(stream);
   });
 };
+
 
 exports.addNewBook = async (data) => {
 
@@ -35,9 +39,13 @@ exports.addNewBook = async (data) => {
 
   if (existingBook) throw new Error('Book already exists');
 
-  let image = null;
+  let image_url = null;
+  let image_public_id = null;
+
   if (data.file) {
-    image = await uploadToCloudinary(data.file);
+    const uploaded = await uploadToCloudinary(data.file);
+    image_url = uploaded.url;
+    image_public_id = uploaded.public_id;
   }
 
   const newBook = await Book.create({
@@ -45,8 +53,10 @@ exports.addNewBook = async (data) => {
     author: data.author,
     library_id: data.library_id,
     category_id: data.category_id,
-    image
+    image: image_url,
+    image_public_id
   });
+
 
   return newBook;
 };
@@ -146,4 +156,85 @@ exports.getBookById = async (book_id, user_role, user_library_id) => {
 
   return book;
 
+};
+
+
+exports.updateBook = async (data) => {
+  const {
+    book_id,
+    library_id,
+    title,
+    status,
+    category_id,
+    author,
+    file
+  } = data;
+
+  
+  const book = await Book.findOne({
+    where: { id: book_id }
+  });
+
+  if (!book) {
+    throw new Error('Book not found');
+  }
+
+  
+  if (book.library_id !== library_id) {
+    throw new Error('Access denied to update this book');
+  }
+
+  
+  if (category_id && category_id !== book.category_id) {
+    const category = await Category.findOne({
+      where: { id: category_id }
+    });
+
+    if (!category) {
+      throw new Error('Category does not exist');
+    }
+
+    if (category.library_id !== library_id) {
+      throw new Error('Category does not belong to this library');
+    }
+
+   
+    const duplicate = await Book.findOne({
+      where: {
+        title,
+        category_id
+      }
+    });
+
+    if (duplicate && duplicate.id !== book.id) {
+      throw new Error('Book already exists in this category');
+    }
+  }
+
+  let image = book.image;
+  let image_public_id = book.image_public_id;
+
+  if (file) {
+
+    // delete old image if exists
+    if (image_public_id) {
+      await cloudinary.uploader.destroy(image_public_id);
+    }
+
+    const uploaded = await uploadToCloudinary(file);
+    image = uploaded.url;
+    image_public_id = uploaded.public_id;
+  }
+
+ 
+  await book.update({
+    title,
+    author,
+    category_id,
+    image,
+    image_public_id,
+    status
+  });
+
+  return book;
 };
