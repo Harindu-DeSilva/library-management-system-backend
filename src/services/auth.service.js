@@ -93,3 +93,15 @@ exports.resetPasswordAtFirstLogin = async (data) => {
   return { safeUser, token };
 
 };
+
+
+
+exports.getCurrentUser = async (user_id) => {
+
+  const user = await User.findByPk(user_id);
+
+  if(!user) throw new Error('User not found');
+
+  return user;
+
+};

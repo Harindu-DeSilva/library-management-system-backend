@@ -1,4 +1,4 @@
-const { signupUser, loginUser, resetPasswordAtFirstLogin } = require('../services/auth.service');
+const { signupUser, loginUser, resetPasswordAtFirstLogin, getCurrentUser } = require('../services/auth.service');
 const { signupSchema, loginSchema, changePasswordSchema } = require('../validations/auth.validation');
 
 
@@ -107,6 +107,30 @@ exports.resetPassword = async (req, res) => {
     return res.status(500).json({
       success: false,
       error: error.message
+    });
+  }
+
+};
+
+
+// get data of current user
+exports.authMe = async (req,res) => {
+
+  const { id } = req.user;
+
+  try{
+
+    const current_user = await getCurrentUser(id);
+
+    return res.status(200).json({
+      success: true,
+      user: current_user
+    });
+
+  }catch(error){
+    return res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 
