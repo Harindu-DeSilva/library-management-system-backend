@@ -1,4 +1,5 @@
 const {User, Library} = require('../models');
+const { Op, fn, col, where } = require('sequelize');
 
 exports.registerUser = async (data) => {
 
@@ -17,7 +18,7 @@ exports.registerUser = async (data) => {
 
 
 
-exports.getAllUsers = async (library_id, role, page = 1, limit = 10) => {
+exports.getAllUsers = async (library_id, role, page = 1, limit = 10, search = "") => {
 
   const offset = (page - 1) * limit;
 
@@ -28,13 +29,37 @@ exports.getAllUsers = async (library_id, role, page = 1, limit = 10) => {
 
   }
 
+   // Search filter
+ 
+
+  if(role === "superAdmin"){
+    whereClause.role === "superAdmin";
+    whereClause.role === "admin";
+    whereClause.role === "user";
+
+  }
+
+   if (search) {
+    whereClause[Op.or] = [
+      where(fn('LOWER', col('name')), 'LIKE', `%${search.toLowerCase()}%`),
+      where(fn('LOWER', col('email')), 'LIKE', `%${search.toLowerCase()}%`)
+    ];
+  }
+
   const { rows: users, count } = await User.findAndCountAll({
     where: whereClause,
     attributes: { exclude: ['password'] },
     limit,
     offset,
-    order: [['createdAT', 'DESC']]
+    order: [['createdAt', 'DESC']]
   });
+
+   // Get role counts 
+  const [adminCount, userCount, superAdminCount] = await Promise.all([
+    User.count({ where: { role: "admin" } }),
+    User.count({ where: { role: "user" } }),
+    User.count({ where: { role: "superAdmin" } }),
+  ]);
 
   return {
     users,
@@ -43,7 +68,12 @@ exports.getAllUsers = async (library_id, role, page = 1, limit = 10) => {
       currentPage: page,
       totalPages: Math.ceil(count/limit),
       pageSize: limit
-    }
+    },
+    stats: {
+      admins: adminCount,
+      users: userCount,
+      superAdmins: superAdminCount,
+    },
   };
 
 };
