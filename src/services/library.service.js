@@ -13,13 +13,26 @@ exports.registerLibrary = async (data) => {
 };
 
 
-exports.AllLibraries = async () => {
+exports.AllLibraries = async ( page = 1, limit = 10,) => {
 
-  const libraries = await Library.findAll();
+  const offset = (page - 1) * limit;
 
-  if(!libraries) throw new Error('Libraries not found! Please register a library first.');
+  const {rows: libraries, count} = await Library.findAndCountAll({
+    limit,
+    offset,
+    order: [['createdAt', 'DESC']]
+  });
 
-  return libraries;
+
+  return {
+    libraries,
+    pagination: {
+      totalLibraries: count,
+      currentPage: page,
+      totalPages: Math.ceil(count/limit),
+      pageSize: limit
+    },
+  };
 
 };
 

@@ -42,16 +42,19 @@ exports.fetchAllCategories = async (req,res,next) => {
 
   const { lib_id_params } = req.params;
   const { role, library_id } = req.user;
+  const { page = 1, limit = 10 } = req.query;
 
   try{
 
-    const categories = await getCategories(lib_id_params, role, library_id);
+    const result = await getCategories(lib_id_params, role, library_id, parseInt(page), parseInt(limit));
 
-    if(!categories){
-      return res.status(404).json({message: "Categories not found"});
+    if(!result.categories.length){
+      return res.status(404).json({
+        success:false,
+        message: "Categories not found"});
     }
 
-    return res.status(200).json(categories);
+    return res.status(200).json({succes: true, ...result});
 
   }catch(error){
     return res.status(500).json({message: error.message});

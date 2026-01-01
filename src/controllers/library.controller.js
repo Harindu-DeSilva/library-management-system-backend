@@ -35,20 +35,24 @@ exports.newLibrary = async (req,res,next) => {
 // fetch all libraries
 exports.getAllLibraries = async (req,res,next) => {
 
+  
+  const { page = 1, limit = 10 } = req.query;
+
   try{
 
-    const libraries = await AllLibraries();
+    const result = await AllLibraries(parseInt(page), parseInt(limit));
 
-    if(!libraries){
+    if(!result.libraries.length){
       return res.status(404).json({
         success: false,
         message: 'No libraries found'
       });
     }   
 
-    return res.status(200).json({ libraries });
+    return res.status(200).json({success:true, ...result });
 
   }catch(err){
+    console.error(err);
 
     return res.status(500).json({message: 'Internal server eroor', err: err.message});
 

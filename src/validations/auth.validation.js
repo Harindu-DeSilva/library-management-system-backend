@@ -59,3 +59,28 @@ exports.changePasswordSchema = Joi.object({
 
 
 });
+
+
+exports.updatePasswordSchema = Joi.object({
+
+  currentPassword: Joi.string()
+    .required(),
+  newPassword: Joi.string()
+    .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,30}$'))
+    .required()
+    .min(8)
+    .messages({
+      'string.pattern.base':
+        'Password must contain uppercase, lowercase, and a number'
+  }),
+  confirmPassword: Joi.string()
+    .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,30}$'))
+    .required()
+    .min(8)
+    .messages({
+      'string.pattern.base':
+        'Password must contain uppercase, lowercase, and a number'
+  }),
+
+
+});

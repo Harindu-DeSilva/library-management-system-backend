@@ -97,6 +97,13 @@ exports.getAllBooks = async (user_role, library_id,page = 1, limit = 10) => {
 exports.getAllBooksByCategory = async (category_id, user_role, user_library_id, page = 1, limit = 10) => {
 
   const offset = (page - 1) * limit;
+  console.log({
+  category_id,
+  user_role,
+  user_library_id,
+  page,
+  limit
+});
 
   // Check category exists
   const category = await Category.findOne({

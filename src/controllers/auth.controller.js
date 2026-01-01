@@ -1,5 +1,5 @@
-const { signupUser, loginUser, resetPasswordAtFirstLogin, getCurrentUser } = require('../services/auth.service');
-const { signupSchema, loginSchema, changePasswordSchema } = require('../validations/auth.validation');
+const { signupUser, loginUser, resetPasswordAtFirstLogin, getCurrentUser, passwordChange } = require('../services/auth.service');
+const { signupSchema, loginSchema, changePasswordSchema, updatePasswordSchema } = require('../validations/auth.validation');
 
 
 exports.signup = async (req,res, next) => {
@@ -119,6 +119,44 @@ exports.resetPassword = async (req, res) => {
   }
 
 };
+
+
+
+//update password
+exports.updatePassword = async (req, res) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+  const userId = req.user.id;
+
+  try{
+
+    const { error, value } = await updatePasswordSchema.validate({currentPassword, newPassword, confirmPassword});
+
+    if(error){
+      return res.status(400).json({message: error.details[0].message});
+    }
+
+    const {safeUser,token} = await passwordChange({...value, userId});
+
+    
+    res.cookie('Authorization', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+      maxAge: 8 * 60 * 60 * 1000, 
+    });
+
+    return res.status(200).json({message:'password updated successfully', user:safeUser, token});
+
+  }catch(error){
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+
+};
+
 
 
 // get data of current user

@@ -88,18 +88,25 @@ exports.editCategory = async (data, category_id, admin_library_id) => {
     throw new Error('Category not found');
   }
 
-  if(category_exists.library_id === admin_library_id){
+  if(category_exists.library_id === admin_library_id ){
 
-    const category = await Category.update(
-      data,
-      {
-        where: {
-          id: category_id
+    if(category_exists.category_name !== data.category_name){
+
+      const category = await Category.update(
+        data,
+        {
+          where: {
+            id: category_id
+          }
         }
-      }
-    );
+      
+      );
+      if(!category) throw new Error('Category update failed');
 
-    if(!category) throw new Error('Category update failed');
+    }else{
+      throw new Error('Name should not be the same');
+    }
+
 
     const newCategory = await Category.findOne({
       where: {

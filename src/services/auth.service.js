@@ -95,6 +95,48 @@ exports.resetPasswordAtFirstLogin = async (data) => {
 };
 
 
+exports.passwordChange =  async (data) => {
+  
+  const user = await User.findByPk(data.userId);
+  if (!user) throw new Error('User not found');
+
+  if(data.newPassword !== data.confirmPassword){
+    throw new Error('password does not match');
+  }
+
+  const valid = await bcrypt.compare(data.currentPassword, user.password);
+  if (!valid) throw new Error('Invalid current password');
+
+  if (await bcrypt.compare(data.newPassword, user.password)) {
+    throw new Error('New password cannot be same as old password');
+  }
+
+
+  const hashed = await bcrypt.hash(data.newPassword, 10);
+
+  await user.update({
+    password: hashed
+  });
+
+  const token = jwt.sign(
+    {
+      id: user.id,
+      role: user.role,
+      library_id: user.library_id,
+      oneTime: false
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: '8h'
+    }
+  );
+
+  const { password, ...safeUser } = user.toJSON();
+
+  return { safeUser, token };
+};
+
+
 
 exports.getCurrentUser = async (user_id) => {
 
