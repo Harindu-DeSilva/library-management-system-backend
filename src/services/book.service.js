@@ -53,6 +53,7 @@ exports.addNewBook = async (data) => {
     author: data.author,
     library_id: data.library_id,
     category_id: data.category_id,
+    quantity: data.quantity,
     image: image_url,
     image_public_id
   });
@@ -173,6 +174,7 @@ exports.updateBook = async (data) => {
     title,
     status,
     category_id,
+    quantity,
     author,
     file
   } = data;
@@ -238,6 +240,7 @@ exports.updateBook = async (data) => {
     title,
     author,
     category_id,
+    quantity,
     image,
     image_public_id,
     status

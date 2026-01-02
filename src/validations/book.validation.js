@@ -11,6 +11,10 @@ exports.bookSchema = Joi.object({
   author: Joi.string()
     .min(3)
     .max(30)
+    .required(),
+  quantity: Joi.number()
+    .min(0)
+    .integer()
     .required()
 });
 
@@ -25,5 +29,8 @@ exports.updateBookSchema = Joi.object({
     .min(3)
     .max(30),
     status: Joi.string()
-      .valid('available', 'borrowed', 'damaged')
+      .valid('available', 'borrowed', 'damaged'),
+  quantity: Joi.number()
+    .integer()
+    .min(0),
 });
