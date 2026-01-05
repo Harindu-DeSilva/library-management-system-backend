@@ -6,6 +6,7 @@ const Library = require('./library')(sequelize);
 const User = require('./user')(sequelize);
 const Category = require('./category')(sequelize);
 const Book = require('./book')(sequelize);
+const Book_Lends = require('./lendingModel')(sequelize);
 
 // Define associations
 Library.hasMany(User, {
@@ -18,7 +19,7 @@ User.belongsTo(Library, {
   foreignKey: 'library_id'
 });
 
-Category.hasMany(Category, {
+Library.hasMany(Category, {
   foreignKey: 'library_id',
   onDelete: 'CASCADE',
   onUpdate: 'CASCADE'
@@ -65,4 +66,44 @@ Book.belongsTo(Library, {
 });
 
 
-module.exports = { sequelize, User, Library, Category, Book };
+//----------book lends-----------
+User.hasMany(Book_Lends, {
+  foreignKey: 'lend_user_id',
+  onDelete: 'CASCADE'
+});
+
+Book_Lends.belongsTo(User, {
+  foreignKey: 'lend_user_id'
+});
+
+Book.hasMany(Book_Lends, {
+  foreignKey: 'book_id',
+  onDelete: 'CASCADE'
+});
+
+Book_Lends.belongsTo(Book, {
+  foreignKey: 'book_id'
+});
+
+Category.hasMany(Book_Lends, {
+  foreignKey: 'category_id',
+  onDelete: 'CASCADE'
+});
+
+Book_Lends.belongsTo(Category, {
+  foreignKey: 'category_id'
+});
+
+Library.hasMany(Book_Lends, {
+  foreignKey: 'library_id',
+  onDelete: 'CASCADE'
+});
+
+Book_Lends.belongsTo(Library, {
+  foreignKey: 'library_id'
+});
+
+
+
+
+module.exports = { sequelize, User, Library, Category, Book, Book_Lends };

@@ -54,6 +54,7 @@ exports.addNewBook = async (data) => {
     library_id: data.library_id,
     category_id: data.category_id,
     quantity: data.quantity,
+    available: data.quantity,
     image: image_url,
     image_public_id
   });
@@ -172,9 +173,9 @@ exports.updateBook = async (data) => {
     book_id,
     library_id,
     title,
-    status,
     category_id,
     quantity,
+    damaged,
     author,
     file
   } = data;
@@ -235,15 +236,29 @@ exports.updateBook = async (data) => {
     image_public_id = uploaded.public_id;
   }
 
+  // calculate new availability
+  let newDamaged = book.damaged;
+  let newAvailable = book.available;
+
+  if (typeof damaged === 'number') {
+    if (damaged > quantity) throw new Error("Damaged books cannot exceed total quantity");
+
+    newDamaged = damaged;                    // replace
+    newAvailable = quantity - newDamaged;    // recalc
+    if (newAvailable < 0) throw new Error('Available books cannot be negative');
+  } else {
+    newAvailable = quantity - book.damaged;
+  }
  
   await book.update({
     title,
     author,
     category_id,
     quantity,
+    available: newAvailable,
+    damaged: newDamaged,
     image,
-    image_public_id,
-    status
+    image_public_id
   });
 
   return book;

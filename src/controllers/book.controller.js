@@ -105,13 +105,13 @@ exports.fetchBookByID = async (req,res) => {
 exports.updateBookById = async (req,res) => {
 
   const { book_id } = req.params;
-  const { title, category_id, author, status, quantity } = req.body;
+  const { title, category_id, author, quantity, damaged } = req.body;
   const file = req.file;
   const { library_id } = req.user;
 
   try{
 
-    const { error, value } = await updateBookSchema.validate({title, category_id, author, status, quantity});
+    const { error, value } = await updateBookSchema.validate({title, category_id, author, quantity, damaged});
 
     if(error){
       return res.status(400).json({message: error.details[0].message});

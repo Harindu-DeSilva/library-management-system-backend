@@ -41,14 +41,23 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true
     },
-   status: {
-      type: DataTypes.ENUM('available', 'borrowed', 'damaged'),
-      defaultValue: 'available',
-      allowNull: false
-    },
     quantity: {
       type: DataTypes.NUMBER,
       allowNull: false
+    },
+    available: {
+      type: DataTypes.NUMBER,
+      allowNull: false
+    },
+    borrowed: {
+      type: DataTypes.NUMBER,
+      allowNull: false,
+      defaultValue:0
+    },
+    damaged: {
+      type: DataTypes.NUMBER,
+      allowNull: false,
+      defaultValue:0
     }
 
   }, {

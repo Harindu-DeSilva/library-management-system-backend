@@ -28,9 +28,10 @@ exports.updateBookSchema = Joi.object({
   author: Joi.string()
     .min(3)
     .max(30),
-    status: Joi.string()
-      .valid('available', 'borrowed', 'damaged'),
   quantity: Joi.number()
+    .integer()
+    .min(0),
+  damaged: Joi.number()
     .integer()
     .min(0),
 });
