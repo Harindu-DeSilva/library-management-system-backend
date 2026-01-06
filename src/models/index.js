@@ -73,7 +73,8 @@ User.hasMany(Book_Lends, {
 });
 
 Book_Lends.belongsTo(User, {
-  foreignKey: 'lend_user_id'
+  foreignKey: 'lend_user_id',
+  as: 'lendUser'
 });
 
 Book.hasMany(Book_Lends, {

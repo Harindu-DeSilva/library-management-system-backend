@@ -5,6 +5,7 @@ const router = express.Router();
 
 
 router.post('/lending/:book_id', verifyToken, authorizeRoles("admin"), firstLogin,lendingController.LendBooksToUsers);
-
+router.get('/lending', verifyToken, authorizeRoles("admin"), firstLogin, lendingController.fetchAllLendRecords);
+router.patch('/update-lending/:lend_id', verifyToken, authorizeRoles("admin"), firstLogin, lendingController.updateLendRecords);
 
 module.exports = router;

@@ -1,20 +1,30 @@
-const { Book, Category, Book_Lends } = require("../models");
+const { Book, Category, Book_Lends, Library, User } = require("../models");
 
 
 
 exports.lendNewBook = async (data) => {
 
-  const BookExists = await Book.findOne({where: {id:data.book_id}})
-
-  if(!BookExists) throw new Error('Book not found');
-
-  const categoryExists = await Category.findOne({
-    where: {id: data.category_id, library_id: data.library_id}
+  const book = await Book.findOne({
+    where: { id: data.book_id }
   });
 
-  if(!categoryExists) throw new Error('Invalid category or access denied');
+  if (!book) throw new Error("Book not found");
 
-  const bookLend = await Book_Lends.create({
+  const category = await Category.findOne({
+    where: { id: data.category_id, library_id: data.library_id }
+  });
+
+  if (!category) throw new Error("Invalid category or access denied");
+
+  // --- Availability Checks ---
+  if (data.quantity > book.available)
+    throw new Error("Not enough available copies");
+
+  const newAvailable = book.available - data.quantity;
+  const newBorrowed = book.borrowed + data.quantity;
+
+  // --- Create lending record ---
+  const lendRecord = await Book_Lends.create({
     lend_user_id: data.lend_user_id,
     book_id: data.book_id,
     quantity: data.quantity,
@@ -23,6 +33,112 @@ exports.lendNewBook = async (data) => {
     due_date: data.due_date,
   });
 
-  return bookLend;
+  // --- Update Book ---
+  await Book.update(
+    {
+      available: newAvailable,
+      borrowed: newBorrowed
+    },
+    {
+      where: { id: data.book_id }
+    }
+  );
+
+  return { lendRecord };
+};
+
+
+exports.getAllLendData = async (library_id, user_id, page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+
+  const library = await Library.findOne({
+    where: { id: library_id }
+  });
+
+  if (!library) throw new Error("Library not found");
+
+  const { rows: lends, count } = await Book_Lends.findAndCountAll({
+    where: {
+      library_id,
+      // optionally filter by user
+      ...(user_id && { lend_user_id: user_id })
+    },
+    include: [
+      {
+        model: Book,
+        attributes: ["title"]
+      },
+      {
+        model: Category,
+        attributes: ["category_name"]
+      },
+      {
+        model: User,
+        as: "lendUser",       // only if alias used
+        attributes: ["name", "email"]
+      },
+      {
+        model: Library,
+        attributes: ["name"]
+      }
+    ],
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]]
+  });
+
+  return { 
+      lends,
+      pagination: {
+        totalLendRecords: count,
+        currentPage: page,
+        totalPages: Math.ceil(count/limit),
+        pageSize: limit
+      } 
+    };
+};
+
+
+exports.updateLendData = async(lend_id,data) => {
+
+  const lend = await Book_Lends.findOne({where: {id: lend_id}});
+
+  if(!lend) throw new Error('No record found');
+
+  const updateRecord = await Book_Lends.update(
+    {
+      return_date: data.return_date,
+      status: data.status
+    },
+    {
+      where: {id: lend_id}
+    }
+  );
+
+  if(!updateRecord) throw new Error('update failed');
+
+  const book = await Book.findOne({where: {id: data.book_id}});
+
+  if(!book) throw new Error('Book not found');
+
+  const newAvailable = book.available + data.quantity;
+  const newBorrowed = book.borrowed - data.quantity;
+
+  // --- Update Book ---
+  await Book.update(
+    {
+      available: newAvailable,
+      borrowed: newBorrowed
+    },
+    {
+      where: { id: data.book_id }
+    }
+  );
+
+
+  const lends = await Book_Lends.findOne({where: {id: lend_id}});
+
+  return lends;
+
 
 };

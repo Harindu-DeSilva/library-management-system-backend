@@ -14,3 +14,17 @@ exports.lendingCreateValidationSchema = Joi.object({
   due_date: Joi.date()
     .required()
 });
+
+
+
+exports.lendingUpdateValidationSchema = Joi.object({
+  book_id: Joi.string()
+    .required(),
+  quantity: Joi.number()
+    .required(),
+  return_date: Joi.date()
+    .required(),
+  status: Joi.string()
+    .required()
+    .validate("BORROWED", "RETURNED", "OVERDUE"),
+});
