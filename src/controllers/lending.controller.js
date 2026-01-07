@@ -52,6 +52,8 @@ exports.updateLendRecords = async (req,res) => {
     const { lend_id } = req.params;
     const { book_id, status, quantity, return_date } = req.body;
 
+    console.log(lend_id, book_id, status, quantity, return_date);
+
     const { error,value } = await lendingUpdateValidationSchema.validate({book_id, quantity, return_date, status});
 
     if(error){
@@ -67,6 +69,7 @@ exports.updateLendRecords = async (req,res) => {
     return res.status(200).json({success: true, result});
 
   }catch(error){
+    console.error(error);
     return res.status(500).json({success:false, Error: error.message});
   }
 };

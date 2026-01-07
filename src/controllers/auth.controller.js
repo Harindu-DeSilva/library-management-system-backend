@@ -1,5 +1,5 @@
-const { signupUser, loginUser, resetPasswordAtFirstLogin, getCurrentUser, passwordChange } = require('../services/auth.service');
-const { signupSchema, loginSchema, changePasswordSchema, updatePasswordSchema } = require('../validations/auth.validation');
+const { signupUser, loginUser, resetPasswordAtFirstLogin, getCurrentUser, passwordChange, sendCodeForForgetPassword, verifyCodeForForgetPassword } = require('../services/auth.service');
+const { signupSchema, loginSchema, changePasswordSchema, updatePasswordSchema, acceptForgotPasswordCodeSchema } = require('../validations/auth.validation');
 
 
 exports.signup = async (req,res, next) => {
@@ -180,4 +180,52 @@ exports.authMe = async (req,res) => {
     });
   }
 
+};
+
+
+
+
+// Send Forgot Password Code Controller
+exports.sendForgotPasswordCode = async (req,res) => {
+
+  try{
+    const {email} = req.body;
+
+    const sendCode = await sendCodeForForgetPassword(email);
+
+    if(!sendCode){
+      return res.status(400).json({success:false, message: 'Verification code send failed'});
+    }
+
+    res.status(200).json({ success: true, message: 'Forgot password code sent successfull!' });
+
+  }catch(err){
+    console.log(err);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
+
+
+
+// Verify Forgot Password Code Controller
+exports.verifyForgotPasswordCode = async (req,res) => {
+  const {email, providedCode, newPassword} = req.body;
+
+  try{
+
+    const { error, value} = acceptForgotPasswordCodeSchema.validate({ email, providedCode, newPassword });
+
+    if(error){
+      return res.status(401).json({ success: false, message: error.details[0].message });
+    }
+
+    const updatePassword = await verifyCodeForForgetPassword({...value});
+    
+    return res.status(200).json({success: true, message: "password updated successfully"});
+
+  }catch(err){
+    console.log(err);
+    return res.status(500).json({success: false, message: err.message});
+  }
 };

@@ -10,6 +10,8 @@ router.patch('/reset-password', verifyToken, authorizeRoles("superAdmin","admin"
 router.patch('/update-password', verifyToken, authorizeRoles("superAdmin","admin", "user"), authController.updatePassword);
 router.get('/me', verifyToken, authorizeRoles("superAdmin", "admin", "user"), authController.authMe);
 router.post('/logout',verifyToken,authController.logout);
+router.post('/send-verification-code',authController.sendForgotPasswordCode);
+router.post('/verify-verification-code',authController.verifyForgotPasswordCode);
 
 
 module.exports = router;

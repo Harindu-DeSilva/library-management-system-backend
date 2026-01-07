@@ -25,6 +25,6 @@ exports.lendingUpdateValidationSchema = Joi.object({
   return_date: Joi.date()
     .required(),
   status: Joi.string()
-    .required()
-    .validate("BORROWED", "RETURNED", "OVERDUE"),
+    .valid("BORROWED", "RETURNED", "OVERDUE")
+    .required(),
 });

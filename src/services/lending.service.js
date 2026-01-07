@@ -1,5 +1,5 @@
 const { Book, Category, Book_Lends, Library, User } = require("../models");
-
+const { Op } = require("sequelize");
 
 
 exports.lendNewBook = async (data) => {
@@ -57,6 +57,18 @@ exports.getAllLendData = async (library_id, user_id, page = 1, limit = 10) => {
 
   if (!library) throw new Error("Library not found");
 
+  await Book_Lends.update(
+    { status: "OVERDUE" },
+    {
+      where: {
+        status: "BORROWED",
+        due_date: { [Op.lt]: new Date() }
+      }
+    }
+  );
+
+
+
   const { rows: lends, count } = await Book_Lends.findAndCountAll({
     where: {
       library_id,
@@ -99,9 +111,9 @@ exports.getAllLendData = async (library_id, user_id, page = 1, limit = 10) => {
 };
 
 
-exports.updateLendData = async(lend_id,data) => {
+exports.updateLendData = async(data) => {
 
-  const lend = await Book_Lends.findOne({where: {id: lend_id}});
+  const lend = await Book_Lends.findOne({where: {id: data.lend_id}});
 
   if(!lend) throw new Error('No record found');
 
@@ -111,13 +123,13 @@ exports.updateLendData = async(lend_id,data) => {
       status: data.status
     },
     {
-      where: {id: lend_id}
+      where: {id: data.lend_id}
     }
   );
 
   if(!updateRecord) throw new Error('update failed');
 
-  const book = await Book.findOne({where: {id: data.book_id}});
+  const book = await Book.findByPk(data.book_id);
 
   if(!book) throw new Error('Book not found');
 
@@ -125,18 +137,22 @@ exports.updateLendData = async(lend_id,data) => {
   const newBorrowed = book.borrowed - data.quantity;
 
   // --- Update Book ---
-  await Book.update(
-    {
-      available: newAvailable,
-      borrowed: newBorrowed
-    },
-    {
-      where: { id: data.book_id }
-    }
-  );
+  if(data.status === "RETURNED"){
+    if(lend.status === "RETURNED") throw new Error("Book already returned");
+
+    await Book.update(
+      {
+        available: newAvailable,
+        borrowed: newBorrowed
+      },
+      {
+        where: { id: data.book_id }
+      }
+    );
+  };
 
 
-  const lends = await Book_Lends.findOne({where: {id: lend_id}});
+  const lends = await Book_Lends.findOne({where: {id: data.lend_id}});
 
   return lends;
 

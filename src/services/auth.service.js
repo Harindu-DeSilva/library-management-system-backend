@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const {User, Library} = require('../models');
+const { hmacProcess} = require("../utils/hmac");
+const codeEmail = require("../middlewares/sendMail");
 
 
 exports.signupUser = async (data) => {
@@ -145,5 +147,77 @@ exports.getCurrentUser = async (user_id) => {
   if(!user) throw new Error('User not found');
 
   return user;
+
+};
+
+
+
+exports.sendCodeForForgetPassword = async (email) => {
+
+  const existingUser = await User.findOne({where:{email: email} });
+
+  if(!existingUser){
+    throw new Error('User does not exists!');
+  }
+
+  const codeValue = Math.floor( Math.random() * 1000000).toString();
+
+  let info = await codeEmail.sendMail({
+    from: process.env.CODE_SENDING_EMAIL_USER,
+    to: existingUser.email,
+    subject: "Forgot Password Verification Code - Library Management System",
+    html: `<p>Your forgot password verification code is: <b>${codeValue}</b></p>`
+  })
+
+  if(info.accepted[0] === existingUser.email){
+
+    const hashedCodeValue = hmacProcess(codeValue, process.env.HMAC_VERIFICATION_CODE_SECRET);
+
+    existingUser.forgotPasswordCode = hashedCodeValue;
+    existingUser.forgotPasswordCodeValidation = Date.now();
+    await existingUser.save();
+
+    return {success: true};
+  }
+};
+
+
+
+
+exports.verifyCodeForForgetPassword = async (data) => {
+
+    const codeValue = data.providedCode.toString();
+    const existingUser = await User.findOne({where: {email: data.email} });
+
+    if(!existingUser){
+      throw new Error('User does not exists!');
+    }
+
+    if(!existingUser.forgotPasswordCode || !existingUser.forgotPasswordCodeValidation){
+      throw new Error('No verification code found! Please request a new code.');
+    }
+
+    if (await bcrypt.compare(data.newPassword, existingUser.password)) {
+      throw new Error('New password cannot be same as old password');
+    }
+
+    //verification code expires in 5 minutes
+    if(Date.now() - existingUser.forgotPasswordCodeValidation > 5 * 60 * 1000){
+      throw new Error('Verification code expired! Please request a new code.');
+    }
+
+    const hashedCodeValue = hmacProcess(codeValue, process.env.HMAC_VERIFICATION_CODE_SECRET)
+
+    if(hashedCodeValue === existingUser.forgotPasswordCode){
+      const hashedPassword = await bcrypt.hash(data.newPassword, 12);
+      existingUser.password = hashedPassword;
+      existingUser.forgotPasswordCode = null;
+      existingUser.forgotPasswordCodeValidation = null;
+      const changed = await existingUser.save();
+
+      return changed;
+    }
+
+    throw new Error('Invalid verification code!');
 
 };

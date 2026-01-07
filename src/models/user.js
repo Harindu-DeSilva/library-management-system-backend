@@ -37,7 +37,15 @@ module.exports = (sequelize) => {
       },
       onDelete: 'SET NULL',
       onUpdate: 'CASCADE'
-    }
+    },
+     forgotPasswordCode: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    forgotPasswordCodeValidation: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
   }, {
     tableName: 'users',
     timestamps: true
