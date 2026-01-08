@@ -1,4 +1,5 @@
 const {Library} = require('../models');
+const { Op } = require("sequelize");
 
 
 exports.registerLibrary = async (data) => {
@@ -13,28 +14,37 @@ exports.registerLibrary = async (data) => {
 };
 
 
-exports.AllLibraries = async ( page = 1, limit = 10,) => {
 
+exports.AllLibraries = async (page = 1, limit = 10, search = "") => {
   const offset = (page - 1) * limit;
 
-  const {rows: libraries, count} = await Library.findAndCountAll({
+  const whereCondition = search
+    ? {
+        [Op.or]: [
+          { name: { [Op.like]: `%${search}%` } },
+          { email: { [Op.like]: `%${search}%` } }
+        ]
+      }
+    : {};
+
+  const { rows: libraries, count } = await Library.findAndCountAll({
+    where: whereCondition,
     limit,
     offset,
-    order: [['createdAt', 'DESC']]
+    order: [["createdAt", "DESC"]],
   });
-
 
   return {
     libraries,
     pagination: {
       totalLibraries: count,
-      currentPage: page,
-      totalPages: Math.ceil(count/limit),
-      pageSize: limit
+      currentPage: Number(page),
+      totalPages: Math.ceil(count / limit),
+      pageSize: Number(limit),
     },
   };
-
 };
+
 
 
 

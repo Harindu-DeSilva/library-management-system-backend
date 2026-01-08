@@ -42,6 +42,7 @@ exports.fetchAllUsers = async (req,res,next) => {
 
   const { library_id, role } = req.user;
   const { page = 1, limit = 10 } = req.query;
+  const search = req.query.search || "";
 
   try{
 
@@ -49,7 +50,8 @@ exports.fetchAllUsers = async (req,res,next) => {
       library_id,
       role,
       parseInt(page),
-      parseInt(limit)
+      parseInt(limit),
+      search
     );
 
     if(!result.users.length){

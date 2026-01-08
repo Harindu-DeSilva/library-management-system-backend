@@ -31,8 +31,10 @@ exports.fetchAllLendRecords = async (req,res) => {
 
   try{
     const { library_id, user_id } = req.user;
+    const { page = 1, limit = 10 } = req.query;
+    const search = req.query.search || "";
 
-    const result = await getAllLendData(library_id, user_id);
+    const result = await getAllLendData(library_id, user_id,parseInt(page), parseInt(limit), search);
 
     if(result.lends.length === 0){
       return res.status(404).json({success: false, message: 'records not found'});

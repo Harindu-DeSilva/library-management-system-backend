@@ -39,12 +39,14 @@ exports.getAllUsers = async (library_id, role, page = 1, limit = 10, search = ""
 
   }
 
-   if (search) {
-    whereClause[Op.or] = [
-      where(fn('LOWER', col('name')), 'LIKE', `%${search.toLowerCase()}%`),
-      where(fn('LOWER', col('email')), 'LIKE', `%${search.toLowerCase()}%`)
-    ];
-  }
+  whereClause = search
+  ? {
+      [Op.or]: [
+        { name: { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } }
+      ]
+    }
+  : {};
 
   const { rows: users, count } = await User.findAndCountAll({
     where: whereClause,

@@ -37,10 +37,12 @@ exports.getAllLibraries = async (req,res,next) => {
 
   
   const { page = 1, limit = 10 } = req.query;
+  
+  const search = req.query.search || "";
 
   try{
 
-    const result = await AllLibraries(parseInt(page), parseInt(limit));
+    const result = await AllLibraries(parseInt(page), parseInt(limit), search);
 
     if(!result.libraries.length){
       return res.status(404).json({

@@ -49,15 +49,14 @@ exports.lendNewBook = async (data) => {
 };
 
 
-exports.getAllLendData = async (library_id, user_id, page = 1, limit = 10) => {
+
+exports.getAllLendData = async (library_id, user_id, page = 1, limit = 10, search = "") => {
   const offset = (page - 1) * limit;
 
-  const library = await Library.findOne({
-    where: { id: library_id }
-  });
-
+  const library = await Library.findOne({ where: { id: library_id } });
   if (!library) throw new Error("Library not found");
 
+  // Update overdue books
   await Book_Lends.update(
     { status: "OVERDUE" },
     {
@@ -68,33 +67,29 @@ exports.getAllLendData = async (library_id, user_id, page = 1, limit = 10) => {
     }
   );
 
+  // Build search condition
+  const searchCondition = search
+    ? {
+        [Op.or]: [
+          { '$lendUser.name$': { [Op.like]: `%${search}%` } },
+          { '$lendUser.email$': { [Op.like]: `%${search}%` } },
+          { '$Book.title$': { [Op.like]: `%${search}%` } }
+        ]
+      }
+    : {};
 
-
-
+  // Fetch lends with pagination and search
   const { rows: lends, count } = await Book_Lends.findAndCountAll({
     where: {
       library_id,
-      // optionally filter by user
-      ...(user_id && { lend_user_id: user_id })
+      ...(user_id && { lend_user_id: user_id }),
+      ...searchCondition
     },
     include: [
-      {
-        model: Book,
-        attributes: ["title"]
-      },
-      {
-        model: Category,
-        attributes: ["category_name"]
-      },
-      {
-        model: User,
-        as: "lendUser",       // only if alias used
-        attributes: ["name", "email"]
-      },
-      {
-        model: Library,
-        attributes: ["name"]
-      }
+      { model: Book, attributes: ["title"] },
+      { model: Category, attributes: ["category_name"] },
+      { model: User, as: "lendUser", attributes: ["name", "email"] },
+      { model: Library, attributes: ["name"] }
     ],
     limit,
     offset,
@@ -103,9 +98,7 @@ exports.getAllLendData = async (library_id, user_id, page = 1, limit = 10) => {
 
   // Send overdue notifications
   for (const lend of lends) {
-
     if (lend.status === "OVERDUE" && lend.lendUser && !lend.overdue_notified) {
-
       await codeEmail.sendMail({
         from: process.env.CODE_SENDING_EMAIL_USER,
         to: lend.lendUser.email,
@@ -119,20 +112,20 @@ exports.getAllLendData = async (library_id, user_id, page = 1, limit = 10) => {
 
       lend.overdue_notified = true;
       await lend.save();
-
     }
   }
 
-  return { 
-      lends,
-      pagination: {
-        totalLendRecords: count,
-        currentPage: page,
-        totalPages: Math.ceil(count/limit),
-        pageSize: limit
-      } 
-    };
+  return {
+    lends,
+    pagination: {
+      totalLendRecords: count,
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      pageSize: limit
+    }
+  };
 };
+
 
 
 exports.updateLendData = async(data) => {
