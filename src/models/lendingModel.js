@@ -72,6 +72,10 @@ module.exports = (sequelize) => {
       type: DataTypes.ENUM("BORROWED", "RETURNED", "OVERDUE"),
       defaultValue: "BORROWED"
     },
+    overdue_notified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    }
 
   }, {
     tableName: 'book_lends',

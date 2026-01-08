@@ -1,5 +1,6 @@
 const { Book, Category, Book_Lends, Library, User } = require("../models");
 const { Op } = require("sequelize");
+const codeEmail = require("../middlewares/sendMail");
 
 
 exports.lendNewBook = async (data) => {
@@ -69,6 +70,7 @@ exports.getAllLendData = async (library_id, user_id, page = 1, limit = 10) => {
 
 
 
+
   const { rows: lends, count } = await Book_Lends.findAndCountAll({
     where: {
       library_id,
@@ -98,6 +100,28 @@ exports.getAllLendData = async (library_id, user_id, page = 1, limit = 10) => {
     offset,
     order: [["createdAt", "DESC"]]
   });
+
+  // Send overdue notifications
+  for (const lend of lends) {
+
+    if (lend.status === "OVERDUE" && lend.lendUser && !lend.overdue_notified) {
+
+      await codeEmail.sendMail({
+        from: process.env.CODE_SENDING_EMAIL_USER,
+        to: lend.lendUser.email,
+        subject: `${lend.Library.name} - Overdue Book Reminder - Library Management System`,
+        html: `
+          <p>Dear ${lend.lendUser.name},</p>
+          <p>The book <b>${lend.Book.title}</b> you borrowed is now <b>OVERDUE</b>.</p>
+          <p>Please return it as soon as possible.</p>
+        `
+      });
+
+      lend.overdue_notified = true;
+      await lend.save();
+
+    }
+  }
 
   return { 
       lends,
